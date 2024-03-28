@@ -420,7 +420,7 @@ VmbErrorType AvtVimbaCamera::setFeatureValue(const std::string& feature_str, con
   }
   else
   {
-    ROS_WARN_STREAM("Could not get feature " << feature_str << ", your camera probably doesn't support it.");
+    ROS_DEBUG_STREAM_ONCE("Could not get feature " << feature_str << ", your camera probably doesn't support it.");
   }
   return err;
 }
