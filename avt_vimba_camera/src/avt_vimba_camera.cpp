@@ -140,8 +140,8 @@ void AvtVimbaCamera::start(const std::string& ip_str, const std::string& guid_st
   getFeatureValue("TriggerSource", trigger_source);
 
   SP_SET(frame_obs_ptr_,
-          new FrameObserver(vimba_camera_ptr_,
-                            std::bind(&avt_vimba_camera::AvtVimbaCamera::frameCallback, this, std::placeholders::_1)));
+         new FrameObserver(vimba_camera_ptr_,
+                           std::bind(&avt_vimba_camera::AvtVimbaCamera::frameCallback, this, std::placeholders::_1)));
   RCLCPP_INFO(nh_->get_logger(), "Ready to receive frames triggered by %s", trigger_source.c_str());
   camera_state_ = IDLE;
 
@@ -810,7 +810,7 @@ bool AvtVimbaCamera::createParamFromFeature(const FeaturePtr feature, std::strin
         feature->GetValue(initial_value);
         feature->GetRange(minimum_value, maximum_value);
         feature->GetIncrement(step);
-        
+
         initial_value = std::max(maximum_value, std::min(initial_value, minimum_value));
 
         rcl_interfaces::msg::FloatingPointRange float_range;
@@ -820,7 +820,7 @@ bool AvtVimbaCamera::createParamFromFeature(const FeaturePtr feature, std::strin
         // float_range.step = step;
 
         descriptor.floating_point_range.push_back(float_range);
-        
+
         nh_->declare_parameter<double>(PARAM_NAMESPACE + feature_name, initial_value, descriptor);
         break;
       }
@@ -882,7 +882,6 @@ AvtVimbaCamera::parameterCallback(const std::vector<rclcpp::Parameter>& paramete
     {
       if (writable_features_[feature_name])
       {
-
         // Stop imaging since parameter changes can affect the image frames being received
         if (streaming_ && !on_init_config_)
         {
@@ -985,7 +984,7 @@ void AvtVimbaCamera::getCurrentState(diagnostic_updater::DiagnosticStatusWrapper
 {
   stat.add("ID", guid_);
   stat.add("Info", diagnostic_msg_);
-  stat.add("Temperature", getDeviceTemp());
+  // stat.add("Temperature", getDeviceTemp());
 
   switch (camera_state_)
   {
