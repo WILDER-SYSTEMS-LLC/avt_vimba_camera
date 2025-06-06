@@ -10,8 +10,15 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake_auto REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 
 ament_auto_find_build_dependencies()
+
+
 
 # Get architecture
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -69,6 +76,12 @@ ament_auto_add_executable(trigger_exec
   src/exec/trigger_exec.cpp
 )
 
+ament_auto_add_executable(mono_camera_sim_node
+  src/mono_camera_sim_node.cpp
+)
+
+ament_target_dependencies(mono_camera_sim_node rclcpp sensor_msgs cv_bridge OpenCV ament_index_cpp)
+
 #############
 ## Install ##
 #############
@@ -97,8 +110,14 @@ install(FILES ../README.md
   DESTINATION share/${PROJECT_NAME}/
 )
 
+install(TARGETS
+  mono_camera_sim_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_auto_package(INSTALL_TO_SHARE
   calibrations
   config
   launch
+  sample_images
 )
