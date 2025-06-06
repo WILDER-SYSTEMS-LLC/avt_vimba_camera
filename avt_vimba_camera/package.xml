@@ -29,6 +29,9 @@
   <depend>message_filters</depend>
   <depend>avt_vimba_camera_msgs</depend>
 
+  <depend>cv_bridge</depend>
+  <exec_depend>opencv</exec_depend>
+
   <exec_depend>image_proc</exec_depend>
   <exec_depend>stereo_image_proc</exec_depend>
 
