@@ -14,7 +14,7 @@ public:
 
     // Load image from disk
     std::string package_path = ament_index_cpp::get_package_share_directory("avt_vimba_camera");
-    std::string image_path = package_path + "/sample_images/test_img.jpg";
+    std::string image_path = package_path + "/sample_images/test_image.jpg";
     image_ = cv::imread(image_path, cv::IMREAD_COLOR);
 
     if (image_.empty())
