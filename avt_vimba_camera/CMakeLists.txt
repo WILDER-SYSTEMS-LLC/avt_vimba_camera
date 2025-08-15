@@ -16,6 +16,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(ament_index_cpp REQUIRED)
+find_package(camera_info_manager REQUIRED)
 
 ament_auto_find_build_dependencies()
 
