@@ -10,7 +10,7 @@ public:
   MonoCameraSimNode() : Node("mono_camera_sim_node")
   {
     // create publisher
-    publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/sci_viz_image_raw", 10);
+    publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/sci_viz_image", 10);
 
     // Load image from disk
     std::string package_path = ament_index_cpp::get_package_share_directory("avt_vimba_camera");
