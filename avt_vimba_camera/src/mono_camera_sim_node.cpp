@@ -10,9 +10,13 @@ class MonoCameraSimNode : public rclcpp::Node
 public:
   MonoCameraSimNode() : Node("mono_camera_sim_node")
   {
-    // create publishers
-    publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/sci_viz_image_raw", 10);
-    cam_info_publisher_ = this->create_publisher<sensor_msgs::msg::CameraInfo>("/sci_viz_cam_info", 10);
+    // create publishers with QoS settings appropriate for sensor data
+    auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
+    qos.reliability(rclcpp::ReliabilityPolicy::Reliable);
+    qos.durability(rclcpp::DurabilityPolicy::Volatile);
+    
+    publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/sci_viz_image_raw", qos);
+    cam_info_publisher_ = this->create_publisher<sensor_msgs::msg::CameraInfo>("/sci_viz_cam_info", qos);
 
     // Load image from disk
     std::string package_path = ament_index_cpp::get_package_share_directory("avt_vimba_camera");
@@ -66,8 +70,10 @@ private:
     auto stamp = this->get_clock()->now();
     
     // Publish image
-    auto msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", image_).toImageMsg();
-    msg->header.stamp = stamp;
+    std_msgs::msg::Header header;
+    header.stamp = stamp;
+    header.frame_id = "camera_optical_frame";
+    auto msg = cv_bridge::CvImage(header, "bgr8", image_).toImageMsg();
     publisher_->publish(*msg);
     
     // Publish camera info
