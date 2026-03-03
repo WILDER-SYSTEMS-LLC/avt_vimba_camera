@@ -33,6 +33,11 @@ public:
     // Setup camera info
     setupCameraInfo();
 
+    // Pre-convert image message once to avoid overhead in callback
+    std_msgs::msg::Header header;
+    header.frame_id = "camera_optical_frame";
+    image_msg_ = cv_bridge::CvImage(header, "bgr8", image_).toImageMsg();
+
     // Timer to publish at 10 Hz
     timer_ =
         this->create_wall_timer(std::chrono::milliseconds(100), std::bind(&MonoCameraSimNode::timer_callback, this));
@@ -69,12 +74,9 @@ private:
   {
     auto stamp = this->get_clock()->now();
     
-    // Publish image
-    std_msgs::msg::Header header;
-    header.stamp = stamp;
-    header.frame_id = "camera_optical_frame";
-    auto msg = cv_bridge::CvImage(header, "bgr8", image_).toImageMsg();
-    publisher_->publish(*msg);
+    // Update timestamp and publish image
+    image_msg_->header.stamp = stamp;
+    publisher_->publish(*image_msg_);
     
     // Publish camera info
     cam_info_.header.stamp = stamp;
@@ -85,6 +87,7 @@ private:
   rclcpp::Publisher<sensor_msgs::msg::CameraInfo>::SharedPtr cam_info_publisher_;
   rclcpp::TimerBase::SharedPtr timer_;
   cv::Mat image_;
+  sensor_msgs::msg::Image::SharedPtr image_msg_;
   sensor_msgs::msg::CameraInfo cam_info_;
 };
 
