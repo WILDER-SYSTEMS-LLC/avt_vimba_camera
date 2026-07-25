@@ -80,6 +80,10 @@ ament_auto_add_executable(mono_camera_sim_node
   src/mono_camera_sim_node.cpp
 )
 
+# Uses <filesystem> which is C++17. Scope the requirement to this target
+# so we don't perturb other targets in the package.
+set_target_properties(mono_camera_sim_node PROPERTIES CXX_STANDARD 17)
+
 ament_target_dependencies(mono_camera_sim_node rclcpp sensor_msgs cv_bridge OpenCV ament_index_cpp)
 
 #############
@@ -113,13 +117,6 @@ install(FILES ../README.md
 install(TARGETS
   mono_camera_sim_node
   DESTINATION lib/${PROJECT_NAME}
-# Sim publisher (Python) used by scissor_tail_core2/launch/nodes/vision.launch.py
-# when sim is true — loops through sample_images/ and publishes as if it were
-# the real AVT mono camera.
-install(PROGRAMS
-  scripts/mono_camera_sim_node.py
-  DESTINATION lib/${PROJECT_NAME}
-  RENAME mono_camera_sim_node
 )
 
 ament_auto_package(INSTALL_TO_SHARE
