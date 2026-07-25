@@ -113,6 +113,13 @@ install(FILES ../README.md
 install(TARGETS
   mono_camera_sim_node
   DESTINATION lib/${PROJECT_NAME}
+# Sim publisher (Python) used by scissor_tail_core2/launch/nodes/vision.launch.py
+# when sim is true — loops through sample_images/ and publishes as if it were
+# the real AVT mono camera.
+install(PROGRAMS
+  scripts/mono_camera_sim_node.py
+  DESTINATION lib/${PROJECT_NAME}
+  RENAME mono_camera_sim_node
 )
 
 ament_auto_package(INSTALL_TO_SHARE

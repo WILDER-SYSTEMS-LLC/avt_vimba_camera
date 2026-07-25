@@ -35,6 +35,12 @@
   <exec_depend>image_proc</exec_depend>
   <exec_depend>stereo_image_proc</exec_depend>
 
+  <!-- Runtime deps for scripts/mono_camera_sim_node.py (Python sim publisher). -->
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>python3-opencv</exec_depend>
+
   <export><build_type>ament_cmake</build_type></export>
 
 </package>
