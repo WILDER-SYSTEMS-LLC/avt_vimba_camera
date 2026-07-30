@@ -24,6 +24,8 @@
 //   image_dir  (string): directory of sample images. Empty (default) uses
 //                        share/avt_vimba_camera/sample_images.
 //   rate_hz    (double): publish rate. Default 0.5 (one image every 2 s).
+//   image_hold_sec (double): how long to keep publishing the same image
+//                        before advancing to the next one. Default 10.0.
 //   frame_id   (string): frame_id stamped on published messages. Default
 //                        "camera_optical_frame".
 //   loop       (bool)  : wrap around after the last image. Default true.
@@ -39,12 +41,18 @@ public:
     const std::string image_dir =
         this->declare_parameter<std::string>("image_dir", default_dir);
     const double rate_hz = this->declare_parameter<double>("rate_hz", 0.5);
+    image_hold_sec_ = this->declare_parameter<double>("image_hold_sec", 10.0);
     frame_id_ = this->declare_parameter<std::string>("frame_id", "camera_optical_frame");
     loop_ = this->declare_parameter<bool>("loop", true);
 
     if (rate_hz <= 0.0)
     {
       RCLCPP_ERROR(this->get_logger(), "rate_hz must be > 0, got %f", rate_hz);
+      return;
+    }
+    if (image_hold_sec_ <= 0.0)
+    {
+      RCLCPP_ERROR(this->get_logger(), "image_hold_sec must be > 0, got %f", image_hold_sec_);
       return;
     }
 
@@ -57,8 +65,8 @@ public:
       return;
     }
     RCLCPP_INFO(this->get_logger(),
-                "mono_camera_sim: publishing %zu image(s) from %s at %.3f Hz (loop=%s)",
-                images_.size(), image_dir.c_str(), rate_hz, loop_ ? "true" : "false");
+                "mono_camera_sim: publishing %zu image(s) from %s at %.3f Hz (hold %.3f s, loop=%s)",
+                images_.size(), image_dir.c_str(), rate_hz, image_hold_sec_, loop_ ? "true" : "false");
 
     // Publishers (sensor-data-ish QoS, matching the original sim node).
     auto qos = rclcpp::QoS(rclcpp::KeepLast(10));
@@ -151,19 +159,32 @@ private:
     {
       return;
     }
-    if (index_ >= images_.size())
+
+    const auto now = this->get_clock()->now();
+    if (!active_sample_initialized_)
     {
-      if (!loop_)
-      {
-        RCLCPP_INFO(this->get_logger(), "Reached end of sample images (loop=false), cancelling timer.");
-        timer_->cancel();
-        return;
-      }
-      index_ = 0;
+      last_switch_time_ = now;
+      active_sample_initialized_ = true;
     }
 
-    auto & sample = images_[index_++];
-    const auto stamp = this->get_clock()->now();
+    if ((now - last_switch_time_).seconds() >= image_hold_sec_)
+    {
+      ++index_;
+      if (index_ >= images_.size())
+      {
+        if (!loop_)
+        {
+          RCLCPP_INFO(this->get_logger(), "Reached end of sample images (loop=false), cancelling timer.");
+          timer_->cancel();
+          return;
+        }
+        index_ = 0;
+      }
+      last_switch_time_ = now;
+    }
+
+    auto & sample = images_[index_];
+    const auto stamp = now;
 
     sample.image_msg->header.stamp = stamp;
     image_pub_->publish(*sample.image_msg);
@@ -171,8 +192,8 @@ private:
     sample.info.header.stamp = stamp;
     cam_info_pub_->publish(sample.info);
 
-    RCLCPP_INFO(this->get_logger(), "Published %s (%ux%u)",
-                sample.name.c_str(), sample.info.width, sample.info.height);
+    RCLCPP_DEBUG(this->get_logger(), "Published %s (%ux%u)",
+           sample.name.c_str(), sample.info.width, sample.info.height);
   }
 
   struct Sample
@@ -187,6 +208,9 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
   std::vector<Sample> images_;
   size_t index_{0};
+  rclcpp::Time last_switch_time_{0, 0, RCL_ROS_TIME};
+  bool active_sample_initialized_{false};
+  double image_hold_sec_{10.0};
   std::string frame_id_;
   bool loop_{true};
 };
