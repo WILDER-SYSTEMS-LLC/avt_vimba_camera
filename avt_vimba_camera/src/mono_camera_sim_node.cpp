@@ -23,7 +23,9 @@
 // Parameters:
 //   image_dir  (string): directory of sample images. Empty (default) uses
 //                        share/avt_vimba_camera/sample_images.
-//   rate_hz    (double): publish rate. Default 0.5 (one image every 2 s).
+//   rate_hz    (double): publish rate. Default 10.0 (republishes the
+//                        current sample ~100 times over the 10 s hold so
+//                        late-joining subscribers always see it).
 //   image_hold_sec (double): how long to keep publishing the same image
 //                        before advancing to the next one. Default 10.0.
 //   frame_id   (string): frame_id stamped on published messages. Default
@@ -40,7 +42,7 @@ public:
         ament_index_cpp::get_package_share_directory("avt_vimba_camera") + "/sample_images";
     const std::string image_dir =
         this->declare_parameter<std::string>("image_dir", default_dir);
-    const double rate_hz = this->declare_parameter<double>("rate_hz", 0.5);
+    const double rate_hz = this->declare_parameter<double>("rate_hz", 10.0);
     image_hold_sec_ = this->declare_parameter<double>("image_hold_sec", 10.0);
     frame_id_ = this->declare_parameter<std::string>("frame_id", "camera_optical_frame");
     loop_ = this->declare_parameter<bool>("loop", true);
