@@ -15,7 +15,7 @@ public:
     qos.reliability(rclcpp::ReliabilityPolicy::Reliable);
     qos.durability(rclcpp::DurabilityPolicy::Volatile);
     
-    publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/sci_viz_image_raw", qos);
+    publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/sci_viz_image", qos);
     cam_info_publisher_ = this->create_publisher<sensor_msgs::msg::CameraInfo>("/sci_viz_cam_info", qos);
 
     // Load image from disk
