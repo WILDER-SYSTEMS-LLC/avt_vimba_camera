@@ -54,6 +54,11 @@ MonoCameraNode::MonoCameraNode() : Node("camera"), api_(this->get_logger()), cam
   load_srv_ = create_service<avt_vimba_camera_msgs::srv::LoadSettings>("~/load_settings", std::bind(&MonoCameraNode::loadSrvCallback, this, _1, _2, _3));
   save_srv_ = create_service<avt_vimba_camera_msgs::srv::SaveSettings>("~/save_settings", std::bind(&MonoCameraNode::saveSrvCallback, this, _1, _2, _3));
 
+  // Transient local so a (re)started driver still receives the last published intrinsics.
+  camera_info_override_sub_ = create_subscription<sensor_msgs::msg::CameraInfo>(
+      "~/camera_info_override", rclcpp::QoS(1).reliable().transient_local(),
+      std::bind(&MonoCameraNode::cameraInfoOverrideCallback, this, _1));
+
   loadParams();
 }
 
@@ -117,6 +122,12 @@ void MonoCameraNode::frameCallback(const FramePtr& vimba_frame_ptr)
       RCLCPP_WARN_STREAM(this->get_logger(), "Function frameToImage returned 0. No image published.");
     }
   }
+}
+
+void MonoCameraNode::cameraInfoOverrideCallback(const sensor_msgs::msg::CameraInfo::SharedPtr msg)
+{
+  cam_.overrideCameraInfo(*msg);
+  RCLCPP_INFO(this->get_logger(), "Camera intrinsics replaced from ~/camera_info_override");
 }
 
 void MonoCameraNode::startSrvCallback(const std::shared_ptr<rmw_request_id_t> request_header,

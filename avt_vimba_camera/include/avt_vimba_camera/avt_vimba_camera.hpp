@@ -103,6 +103,8 @@ public:
   sensor_msgs::msg::CameraInfo getCameraInfo();
 
   // Setters
+  /// Replace the intrinsics in memory only; unlike set_camera_info, nothing is written to camera_info_url.
+  void overrideCameraInfo(const sensor_msgs::msg::CameraInfo& camera_info);
   void setCallback(frameCallbackFunc callback)
   {
     userFrameCallback = callback;
