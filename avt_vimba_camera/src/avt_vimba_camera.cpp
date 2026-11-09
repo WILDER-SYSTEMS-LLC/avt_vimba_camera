@@ -366,6 +366,13 @@ sensor_msgs::msg::CameraInfo AvtVimbaCamera::getCameraInfo()
   return info_man_->getCameraInfo();
 }
 
+void AvtVimbaCamera::overrideCameraInfo(const sensor_msgs::msg::CameraInfo& camera_info)
+{
+  info_man_->setCameraInfo(camera_info);
+  // Re-apply the sensor size, binning and ROI the camera actually reports.
+  updateCameraInfo();
+}
+
 double AvtVimbaCamera::getTimestampRealTime(VmbUint64_t timestamp_ticks)
 {
   return (static_cast<double>(timestamp_ticks)) / (static_cast<double>(vimba_timestamp_tick_freq_));
